@@ -40,8 +40,6 @@ func main() {
 	defaults.SetDefaults(&config)
 	gcfg.ReadFileInto(&config, configFile)
 
-	log.Printf("%v", config.Format)
-
 	listenOn := fmt.Sprintf("%s:%d", config.Server.Address, config.Server.Port)
 
 	http.HandleFunc("/", handler)
@@ -75,7 +73,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	log.Printf("Serving existing file %s", cachePath)
+	log.Printf("Serving from %s", cachePath)
 	http.ServeFile(w, r, cachePath)
 }
 
