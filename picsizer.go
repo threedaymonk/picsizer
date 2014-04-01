@@ -1,16 +1,18 @@
 package main
 
 import (
-	"code.google.com/p/gcfg"
 	"fmt"
-	"github.com/disintegration/imaging"
-	"github.com/mcuadros/go-defaults"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
+
+	"code.google.com/p/gcfg"
+	"github.com/disintegration/imaging"
+	"github.com/mcuadros/go-defaults"
 )
 
 type Conversion struct {
@@ -30,6 +32,13 @@ type Config struct {
 }
 
 var config Config
+
+func serve404(w http.ResponseWriter, r *http.Request) {
+	notFoundGIF := "GIF89a\x01\x00\x01\x00\x90\x00\x00\xff\xff\xff" +
+		"\x00\x00\x00\x21\xf9\x04\x05\x10\x00\x00\x00\x2c\x00\x00\x00\x00" +
+		"\x01\x00\x01\x00\x00\x02\x02\x04\x01\x00\x3b"
+	http.ServeContent(w, r, "404.gif", time.Now(), strings.NewReader(notFoundGIF))
+}
 
 func main() {
 	log.Printf("Setting GOMAXPROCS to %d", runtime.NumCPU())
@@ -69,7 +78,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		err := convertFile(originalPath, cachePath, format)
 		if err != nil {
 			log.Printf("Error: %s", err)
-			// TODO: Generate stub image?
+			serve404(w, r)
+			return
 		}
 	}
 
